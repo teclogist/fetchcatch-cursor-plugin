@@ -1,0 +1,37 @@
+---
+description: Guardrails for editing FetchCatch workspace JSON under .fetchcatch/
+globs: .fetchcatch/**/*.json
+alwaysApply: false
+---
+
+# FetchCatch workspace guardrails
+
+When editing files under `.fetchcatch/`:
+
+## Never do
+
+- Change `id` GUIDs on flows or response types already synced to the server
+- Invent or guess `apiSourceId` values — they must exist in the tenant
+- Set `"publish": true` unless the user explicitly asks to publish
+- Edit `sync-state.json` by hand
+- Edit or delete `*.remote.json` conflict snapshots
+- Touch `~/.fetchcatch/` credentials
+
+## Always do
+
+- Use node ids matching `^[A-Za-z_][A-Za-z0-9_]*$`
+- Keep `schemaVersion: 1` unless docs manifest specifies otherwise
+- Wire condition edges with `"when": "true"` and `"when": "false"`
+- Add `description` on new nodes
+- After edits, recommend `fcc plan` before `fcc apply`
+- On conflicts, use `fcc diff` and `fcc resolve` — never force-overwrite blindly
+
+## Sync workflow
+
+```bash
+fcc plan --json    # preview changes
+fcc apply --dry-run
+fcc apply          # only after user confirms
+```
+
+Read `.fetchcatch/AGENTS.md` and https://fetchcatch.com/docs/v0.1/ai-agent-guide.md before large changes.

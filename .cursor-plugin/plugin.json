@@ -1,0 +1,21 @@
+{
+  "name": "fetchcatch",
+  "version": "1.0.0",
+  "description": "Cursor plugin for FetchCatch — author version-controlled decision flows in .fetchcatch/, sync with the fcc CLI, and integrate the Evaluate API.",
+  "author": {
+    "name": "FetchCatch",
+    "email": "hello@fetchcatch.com"
+  },
+  "homepage": "https://fetchcatch.com/docs",
+  "repository": "https://github.com/teclogist/fetchcatch-cursor-plugin",
+  "license": "MIT",
+  "keywords": [
+    "fetchcatch",
+    "rules-engine",
+    "decision-flows",
+    "jsonata",
+    "fcc",
+    "business-rules"
+  ],
+  "logo": "assets/logo.svg"
+}
