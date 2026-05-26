@@ -16,8 +16,11 @@ FetchCatch stores version-controlled rules as JSON under `.fetchcatch/`. Flows a
 
 - Editing `.fetchcatch/flows/*.json` or `.fetchcatch/response-types/*.json`
 - Bootstrapping a workspace (`fcc init`, `fcc login`, `fcc pull`)
-- Sync workflow: `fcc status` → `fcc plan` → `fcc apply --dry-run` → `fcc apply`
+- Sync workflow: `fcc status` → `fcc plan` → `fcc apply --dry-run` → `fcc apply` → `fcc publish`
 - Resolving designer vs CLI conflicts (`fcc diff`, `fcc resolve`)
+- Multi-environment workflows with `--env <name>` (v2 `project.json`)
+- Workspace governance modes (`DesignerOnly` / `CodeManaged` / `Hybrid`)
+- Drift detection (`fcc drift`) in CI
 - CI/GitHub Actions sync pipelines
 - Flow graph structure questions (nodes, edges, start/end)
 
@@ -53,7 +56,37 @@ Top-level fields (`schemaVersion: 1`):
 | `slug` | Matches filename, URL-safe |
 | `name` | Display name |
 | `graph` | `{ start, nodes[], edges[], viewport? }` |
-| `publish` | Default `false`; only set `true` when user explicitly asks to publish |
+| `publish` | Leave `false` or omit in git. **Legacy:** `true` on apply still works; prefer `fcc publish` for CI/prod |
+
+## Governance modes
+
+The workspace declares which surface (console vs CLI) is allowed to publish:
+
+| Mode | Console publish | CLI publish |
+|------|---|---|
+| `DesignerOnly` | ✅ | ❌ (apply/publish refused) |
+| `CodeManaged`  | ❌ | ✅ |
+| `Hybrid`       | ✅ | ✅ (default; conflict detector applies) |
+
+If `fcc apply`/`fcc publish` returns HTTP 400 with a "DesignerOnly"/"CodeManaged" message,
+that's governance — change the mode in **Settings → Workspaces** if appropriate.
+
+## Multi-environment (v2 `project.json`)
+
+```jsonc
+{
+  "schemaVersion": 2,
+  "defaultEnvironment": "dev",
+  "environments": {
+    "dev":  { "workspaceSlug": "billing-dev" },
+    "prod": { "workspaceSlug": "billing-prod" }
+  },
+  ...
+}
+```
+
+Every command accepts `--env <name>` to target a profile. Without `--env`, the
+`defaultEnvironment` is used. A per-command `--env` never mutates the binding registry.
 
 Node ids must match `^[A-Za-z_][A-Za-z0-9_]*$`.
 
@@ -89,32 +122,39 @@ Always add `description` on new nodes explaining intent.
 
 Adapt `https://fetchcatch.com/docs/v0.1/sync-and-ci.md` and the example workflow in the FetchCatch repo at `docs/examples/fetchcatch-sync.workflow.yml`.
 
-Auth: `FETCHCATCH_TOKEN` env var. Set `CI=true` to disable prompts.
+Auth: `FETCHCATCH_TOKEN` env var (CLI token `fcc_...`, not an API key). Set `CI=true` to disable prompts. Run `fcc apply` then `fcc publish` on merge to main.
 
 ## CLI reference
 
 ```bash
 fcc init --workspace my-workspace
 fcc login
-fcc pull
-fcc status
-fcc plan --json
-fcc apply --dry-run
-fcc apply
+fcc pull                            # [--env NAME]
+fcc status                          # [--env NAME] [--json]
+fcc plan --json                     # [--env NAME]
+fcc apply --dry-run                 # [--env NAME] [--force] [--json]
+fcc apply                           # writes drafts; refused on DesignerOnly
+fcc publish [PATH|SLUG|ID...]       # snapshot draft → numbered version; refused on DesignerOnly
+fcc drift                           # CI-friendly drift report; exit 2 on divergence
 fcc diff flows/my-flow.json
 fcc resolve flows/my-flow.json --keep-mine|--keep-theirs|--edit
-fcc history flows/my-flow.json
+fcc history flows/my-flow.json                # full save/apply log (with commit SHA column)
+fcc history flows/my-flow.json --publishes    # only events that changed /v1/evaluate output; * = live version
 fcc rollback flows/my-flow.json --version N
 ```
 
-### Exit codes (plan/status)
+### Exit codes (cross-command)
 
 | Code | Meaning |
 |------|---------|
-| 0 | In sync |
+| 0 | Success / in sync |
 | 1 | Error |
-| 2 | Pending changes |
+| 2 | Pending changes / drift (plan, status, drift) |
 | 3 | Conflicts |
+
+`fcc publish` returns 0 unless an individual item errored. The CLI auto-stamps every
+apply/publish request with `X-FCC-Git-Commit` / `X-FCC-Git-Branch` / `X-FCC-Cli-Version`
+so the server can attribute the version to the right commit.
 
 On conflicts: never delete `*.remote.json` and re-apply without inspecting. Use `fcc diff` + `fcc resolve`.
 
@@ -122,11 +162,13 @@ On conflicts: never delete `*.remote.json` and re-apply without inspecting. Use 
 
 1. **Never change** resource `id` GUIDs after they exist on the server.
 2. **Never fabricate** `apiSourceId` — pull existing flows or ask user to configure API sources in the console.
-3. **Do not set** `"publish": true` unless the user explicitly asks.
+3. **Leave** `"publish": false` (or omit) in flow JSON. **Do not set** `"publish": true` — legacy; use `fcc publish` to ship.
 4. **Do not edit** `sync-state.json` or `~/.fetchcatch/` credentials.
 5. **Do not edit** `*.remote.json` conflict snapshots.
-6. Validate: one start node, reachable nodes, condition edges have `when`.
-7. After edits, recommend `fcc plan` before `fcc apply`.
+6. **Do not silently change** `schemaVersion` in `project.json` — v2 adds `environments`/`defaultEnvironment` and is back-compat with v1.
+7. Validate: one start node, reachable nodes, condition edges have `when`.
+8. After edits, recommend `fcc plan` before `fcc apply`, and `fcc publish` as a separate explicit step.
+9. Surface governance errors verbatim — they're intentional, not bugs (see Settings → Workspaces).
 
 ## Documentation links
 
@@ -137,4 +179,6 @@ On conflicts: never delete `*.remote.json` and re-apply without inspecting. Use 
 | Response types | https://fetchcatch.com/docs/v0.1/response-types.md |
 | CLI | https://fetchcatch.com/docs/v0.1/cli-reference.md |
 | Sync & CI | https://fetchcatch.com/docs/v0.1/sync-and-ci.md |
+| Governance modes | https://fetchcatch.com/docs/v0.1/governance.md |
+| Environments | https://fetchcatch.com/docs/v0.1/environments.md |
 | Workspace layout | https://fetchcatch.com/docs/v0.1/workspace-layout.md |

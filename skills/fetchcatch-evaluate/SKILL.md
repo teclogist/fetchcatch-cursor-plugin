@@ -84,7 +84,7 @@ Typed evaluate/resume, structured exceptions, retries, OpenTelemetry.
 
 ## Prerequisites checklist
 
-1. Flow is **published** (not draft-only) — user must publish via console or `"publish": true` on apply.
+1. Flow is **published** (not draft-only) — run `fcc publish`, publish from the console, or (legacy) set `"publish": true` on apply.
 2. API key created in console or synced to `.fetchcatch/api-keys/`.
 3. HTTP nodes' backing APIs reachable from FetchCatch runtime.
 4. Input matches start node `inputSchema`; output matches bound response type.

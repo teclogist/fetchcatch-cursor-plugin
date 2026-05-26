@@ -12,7 +12,7 @@ When editing files under `.fetchcatch/`:
 
 - Change `id` GUIDs on flows or response types already synced to the server
 - Invent or guess `apiSourceId` values — they must exist in the tenant
-- Set `"publish": true` unless the user explicitly asks to publish
+- Set `"publish": true` in flow JSON — legacy; use `fcc publish` or the console to ship
 - Edit `sync-state.json` by hand
 - Edit or delete `*.remote.json` conflict snapshots
 - Touch `~/.fetchcatch/` credentials
@@ -23,7 +23,7 @@ When editing files under `.fetchcatch/`:
 - Keep `schemaVersion: 1` unless docs manifest specifies otherwise
 - Wire condition edges with `"when": "true"` and `"when": "false"`
 - Add `description` on new nodes
-- After edits, recommend `fcc plan` before `fcc apply`
+- After edits, recommend `fcc plan` before `fcc apply`, then `fcc publish` when shipping to runtime
 - On conflicts, use `fcc diff` and `fcc resolve` — never force-overwrite blindly
 
 ## Sync workflow
@@ -31,7 +31,8 @@ When editing files under `.fetchcatch/`:
 ```bash
 fcc plan --json    # preview changes
 fcc apply --dry-run
-fcc apply          # only after user confirms
+fcc apply          # push drafts — only after user confirms
+fcc publish        # ship callable versions for /v1/evaluate
 ```
 
 Read `.fetchcatch/AGENTS.md` and https://fetchcatch.com/docs/v0.1/ai-agent-guide.md before large changes.
