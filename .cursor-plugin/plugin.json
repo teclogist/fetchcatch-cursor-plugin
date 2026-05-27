@@ -1,6 +1,6 @@
 {
   "name": "fetchcatch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cursor plugin for FetchCatch — author version-controlled decision flows in .fetchcatch/, sync with the fcc CLI, and integrate the Evaluate API.",
   "author": {
     "name": "FetchCatch",

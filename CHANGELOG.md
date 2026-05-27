@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2 — 2026-05-27
+
+- Add `fcc run` command skill coverage and `fcc-run` Cursor command
+- Document fetching evaluate runs by id for AI agents (`--json` step trace)
+
 ## 1.0.1 — 2026-05-26
 
 - Document `fcc apply` vs `fcc publish` split; mark flow JSON `publish` field as legacy

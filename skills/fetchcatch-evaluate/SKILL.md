@@ -82,6 +82,12 @@ Typed evaluate/resume, structured exceptions, retries, OpenTelemetry.
 | `GET /v1/runs/{id}` | Run detail + step trace |
 | `GET /v1/runs/stats` | Dashboard KPIs |
 
+CLI equivalent for agents in a repo or CI session:
+
+```bash
+fcc run <runId> --json    # same detail as GET /v1/runs/{id}; needs fcc login or FETCHCATCH_TOKEN
+```
+
 ## Prerequisites checklist
 
 1. Flow is **published** (not draft-only) — run `fcc publish`, publish from the console, or (legacy) set `"publish": true` on apply.

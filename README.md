@@ -2,15 +2,15 @@
 
 Official Cursor plugin for [FetchCatch](https://fetchcatch.com) — the multi-tenant rules engine for version-controlled decision flows.
 
-**Submit to Cursor Marketplace:** [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish) with this repository URL.
-
 ## What it does
+
+This plugin helps developers author, sync, and integrate FetchCatch rules from Cursor:
 
 | Component | Purpose |
 |-----------|---------|
 | **Skills** | Agent knowledge for workspace editing, JSONata, and Evaluate API integration |
 | **Rules** | Guardrails when editing `.fetchcatch/**/*.json` |
-| **Commands** | Quick `fcc plan` and `fcc status` workflows |
+| **Commands** | Quick `fcc plan`, `fcc status`, and `fcc run` workflows |
 
 ## Prerequisites
 
@@ -33,31 +33,37 @@ Install this plugin from the Cursor Marketplace, then ask the agent:
 - "Run fcc plan and summarize pending changes"
 - "Show me how to call this flow from my .NET app"
 
-## Repository layout
+## Plugin contents
 
 ```
-.
+cursor-plugin/
 ├── .cursor-plugin/plugin.json
 ├── skills/
-│   ├── fetchcatch-workspace/
-│   ├── fetchcatch-jsonata/
-│   └── fetchcatch-evaluate/
+│   ├── fetchcatch-workspace/   # Flow authoring + fcc sync
+│   ├── fetchcatch-jsonata/     # Expression patterns
+│   └── fetchcatch-evaluate/    # Runtime API + .NET SDK
 ├── rules/
+│   └── fetchcatch-workspace-guardrails.mdc
 ├── commands/
-├── assets/logo.svg
-├── README.md
-├── CHANGELOG.md
-└── LICENSE
+│   ├── fcc-plan.md
+│   ├── fcc-status.md
+│   └── fcc-run.md
+└── assets/logo.svg
 ```
 
 ## Local testing
 
-1. Copy this repo to `~/.cursor/plugins/local/fetchcatch/`
-2. Restart Cursor or run **Developer: Reload Window**
-3. Open a repo with `.fetchcatch/` and verify skills/rules load
+Before publishing, load the plugin locally:
+
+1. Copy `cursor-plugin/` to `~/.cursor/plugins/local/fetchcatch/`
+2. Ensure `.cursor-plugin/plugin.json` is at the plugin root
+3. Restart Cursor or run **Developer: Reload Window**
+4. Open a repo with `.fetchcatch/` and verify skills/rules appear
+
+On Windows:
 
 ```powershell
-Copy-Item -Recurse -Force . "$env:USERPROFILE\.cursor\plugins\local\fetchcatch"
+Copy-Item -Recurse -Force cursor-plugin "$env:USERPROFILE\.cursor\plugins\local\fetchcatch"
 ```
 
 ## Documentation
@@ -66,6 +72,14 @@ Copy-Item -Recurse -Force . "$env:USERPROFILE\.cursor\plugins\local\fetchcatch"
 - [AI agent guide](https://fetchcatch.com/docs/v0.1/ai-agent-guide.md)
 - [CLI reference](https://fetchcatch.com/docs/v0.1/cli-reference.md)
 - [LLM discovery](https://fetchcatch.com/llms.txt)
+
+## Public marketplace repo
+
+Cursor Marketplace submission uses the **public** repository:
+
+**https://github.com/teclogist/fetchcatch-cursor-plugin**
+
+This folder is a development copy inside the private monorepo. After changes here, sync to the public repo (see `SYNC.md` in the public repo).
 
 ## License
 

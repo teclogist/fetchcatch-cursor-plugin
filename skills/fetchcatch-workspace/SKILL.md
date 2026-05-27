@@ -138,6 +138,7 @@ fcc publish [PATH|SLUG|ID...]       # snapshot draft → numbered version; refus
 fcc drift                           # CI-friendly drift report; exit 2 on divergence
 fcc diff flows/my-flow.json
 fcc resolve flows/my-flow.json --keep-mine|--keep-theirs|--edit
+fcc run <runId> [--json]                         # fetch evaluate run + step trace
 fcc history flows/my-flow.json                # full save/apply log (with commit SHA column)
 fcc history flows/my-flow.json --publishes    # only events that changed /v1/evaluate output; * = live version
 fcc rollback flows/my-flow.json --version N
